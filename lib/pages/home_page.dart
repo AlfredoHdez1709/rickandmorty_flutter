@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rick_morty_bloc/bloc/character/character_bloc.dart';
+import 'package:rick_morty_bloc/model/character_model.dart';
 
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Rick And Morty'),
+        title: Image(
+          image: NetworkImage(
+              'https://heykawaii.com/image/cache/catalog/Artes%20/marcas/Rick_and_Morty_logo-600x315.png'),
+          height: 90,
+        ),
       ),
       body: BlocBuilder<CharacterBloc, CharacterState>(
         builder: (_, state) {
@@ -20,30 +25,46 @@ class HomePage extends StatelessWidget {
               child: Text('Data no Loade'),
             );
           } else if (state is CharacterLoaded) {
-            return GridView.builder(
-                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200,
-                    childAspectRatio: 3 / 2,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20),
-                itemCount: state.character.results.length,
-                itemBuilder: (BuildContext ctx, index) {
-                  return Column(
-                    children: [
-                      Image(
-                        height: 80,
-                        image:
-                            NetworkImage(state.character.results[index].image),
-                      ),
-                      Text(state.character.results[index].name),
-                    ],
-                  );
-                });
+            return ListView.builder(
+              itemCount: state.character.results.length,
+              itemBuilder: (context, index) {
+                return cardUser(state.character.results[index], context);
+              },
+            );
           } else {
             return Container();
           }
         },
       ),
+    );
+  }
+
+  Widget cardUser(Results results, BuildContext context) {
+    return Column(
+      children: [
+        ListTile(
+          leading: Hero(
+            tag: "imageUser",
+            child: CircleAvatar(
+              backgroundImage: NetworkImage(results.image),
+            ),
+            transitionOnUserGestures: true,
+          ),
+          title: Text(results.name),
+          subtitle: Text('Género ${results.gender}'),
+          trailing: Icon(Icons.keyboard_arrow_right),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              'detail',
+              arguments: {
+                'detail': results,
+              },
+            );
+          },
+        ),
+        Divider(),
+      ],
     );
   }
 }
